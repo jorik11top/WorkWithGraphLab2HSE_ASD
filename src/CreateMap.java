@@ -1,4 +1,3 @@
-import java.sql.SQLOutput;
 import java.util.*;
 
 public class CreateMap {
@@ -34,7 +33,8 @@ public class CreateMap {
 //            System.out.println(mas[i].x1 + " " + mas[i].y1+ " " +mas[i].x2+ " " +mas[i].y2);
             for (int j = mas[i].x1; j <= mas[i].x2; j++) {
                 for (int k = mas[i].y1; k <= mas[i].y2; k++) {
-                    map[k][j] +=1;
+                    if (k != mas[i].y2 & j != mas[i].x2)
+                        map[k][j] +=1;
                 }
             }
         }
@@ -119,8 +119,5 @@ public class CreateMap {
             this.y2 = y2;
         }
 
-        public boolean check(int x,int y){
-            return ((x >= x1) & (x <= x2)) & ((y >= y1) & (y <= y2));
-        }
     }
 }
