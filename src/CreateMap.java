@@ -97,7 +97,7 @@ public class CreateMap {
 
 
     }
-//    public static int ComCor()
+
 
     public static void createCoordinateCompression(ArrayList <Integer> list){
         LinkedHashSet<Integer> set = new LinkedHashSet<>();

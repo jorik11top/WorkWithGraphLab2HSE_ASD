@@ -35,8 +35,9 @@ public class PersistentTree {
                 masOper.add(new Operation(mas[i], 1));
                 masOper.add(new Operation(mas[i], -1));
             }
-            BottleSort(masOper);
             // сортируем массив операций
+            BottleSort(masOper);
+            // создания списка операция на каждое дерево
             ArrayList<ArrayList<Operation>> masTr = new ArrayList<>();
             for (int i = 0; i < masX.size(); i++) {
                 masTr.add(new ArrayList<Operation>());
@@ -63,28 +64,22 @@ public class PersistentTree {
                     for (int j = 0; j < masTr.get(i).size(); j++) {
                         masTree[i].modificate(masTr.get(i).get(j).mod, masTr.get(i).get(j).rectangle.pointDown.y, masTr.get(i).get(j).rectangle.pointHigh.y - 1);
                     }
-
-
                 } else {
                     masTree[i] = new Tree();
                     masTree[i].copy(masTree[i - 1]);
                     for (int j = 0; j < masTr.get(i).size(); j++) {
                         masTree[i].modificate(masTr.get(i).get(j).mod, masTr.get(i).get(j).rectangle.pointDown.y, masTr.get(i).get(j).rectangle.pointHigh.y - 1);
                     }
-
                 }
             }
+            // обработка каждой точки
             int countPoint = in.nextInt();
             if (countPoint != 0 ){
-
-
                 for (int i = 0; i < countPoint; i++) {
                     Point point = new Point(in.nextInt(), in.nextInt());
                     point = compressionPoint(masX, masY, point);
-//            System.out.println("(Point"+point.x+" "+point.y + ")");
                     int sum = 0;
                     if (point != null) {
-//                System.out.println("Point"+point.x+" "+point.y);
                         sum = masTree[point.x].sumMod(point.y,sum);
                         System.out.print(sum+" ");
                         sum = 0;
@@ -94,11 +89,11 @@ public class PersistentTree {
                 }
             }
         }
-
-
-
     }
 
+    /***
+        Класс дерева
+     */
     public static class Tree {
         Tree left;
         Tree right;
@@ -111,7 +106,9 @@ public class PersistentTree {
             right = null;
             sum = 0;
         }
-
+        /***
+          создания листа
+         */
         public Tree(int one) {
             lg = one;
             rg = one;
@@ -119,7 +116,9 @@ public class PersistentTree {
             right = null;
             sum = 0;
         }
-
+        /***
+          создания новой вершины
+         */
         public Tree(int start, int end) {
             lg = start;
             rg = end;
@@ -136,7 +135,9 @@ public class PersistentTree {
                 right = new Tree(newEnd + 1, end);
             }
         }
-
+        /***
+         копирования дерева
+         */
         public void copy(Tree tree) {
             lg = tree.lg;
             rg = tree.rg;
@@ -151,7 +152,9 @@ public class PersistentTree {
             }
         }
 
-
+        /***
+         функция которая ставит мод на вершины с полным покрытием
+         */
         public void modificate(int mod, int l, int r) {
             if (l <= lg & r  >= rg) {
                 this.sum += mod;
@@ -164,7 +167,9 @@ public class PersistentTree {
                 }
             }
         }
-
+        /***
+          функция которая находит сумму по координате y
+         */
         public int sumMod(int num, int mod) {
 
             if (num == this.lg & num == this.rg) {
@@ -185,25 +190,11 @@ public class PersistentTree {
                 return Math.max(sum1,sum2);
             }
         }
-        public void print(){
-            if(left == null & right == null){
-                System.out.println(lg+"mod"+sum);
-            }
-            else if(left != null & right == null){
-                System.out.println("("+lg +" "+ rg + ")" +"mod"+sum);
-                left.print();
-            }
-            else if(left == null){
-                System.out.println("("+lg +" "+ rg + ")" +"mod"+sum);
-                right.print();
-            }
-            else{
-                System.out.println("("+lg +" "+ rg + ")" +"mod"+sum);
-                left.print();
-                right.print();
-            }
-        }
     }
+
+    /***
+     Пузырьковая сортировка для операций, по координатам x
+     */
     public static void BottleSort(ArrayList<Operation> masOper){
         for (int i = 0; i < masOper.size(); i++) {
             for (int j = i+1; j < masOper.size(); j++) {
@@ -234,6 +225,9 @@ public class PersistentTree {
             }
         }
     }
+    /***
+     Класс операция, содержащия треугольник и его модификатор
+     */
     public static class Operation{
         Rectangle rectangle;
         int mod;
@@ -242,7 +236,9 @@ public class PersistentTree {
             this.mod = mod;
         }
     }
-
+    /***
+     функция которая сжимает точку по массиву уникальных координат
+     */
     public static Point compressionPoint(ArrayList<Integer> masX,ArrayList<Integer> masY,Point point){
         int nx = masX.indexOf(point.x);
         int ny = masY.indexOf(point.y);
@@ -287,6 +283,9 @@ public class PersistentTree {
         }
 
     }
+    /***
+      создаёт массив уникальных координат
+     */
     public static void createCoordinateCompression(ArrayList <Integer> list){
         LinkedHashSet<Integer> set = new LinkedHashSet<>();
         set.addAll(list);
@@ -294,6 +293,9 @@ public class PersistentTree {
         list.addAll(set);
         Collections.sort(list);
     }
+    /***
+     Класс точки
+     */
     public static class Point{
         int x;
         int y;
@@ -302,6 +304,9 @@ public class PersistentTree {
             this.y = y;
         }
     }
+    /***
+     Класс прямоугольника
+     */
     public static class Rectangle {
         Point pointDown;
         Point pointHigh;
