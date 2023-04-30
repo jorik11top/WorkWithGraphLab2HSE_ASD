@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -7,67 +8,241 @@ public class PersistentTree {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         int countRectangle = in.nextInt();
-        Rectangle[] mas = new Rectangle[countRectangle];
-        for (int i = 0; i < countRectangle; i++){
-            mas[i] = new Rectangle(in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt());
-        }
-        ArrayList<Integer> masX = new ArrayList<>();
-        ArrayList<Integer> masY = new ArrayList<>();
-        for (int i = 0; i < countRectangle; i++){
-            masX.add(mas[i].pointDown.x);
-            masY.add(mas[i].pointDown.y);
-            masX.add(mas[i].pointHigh.x);
-            masY.add(mas[i].pointHigh.y);
-            masY.add(mas[i].pointHigh.y+1);
-            masX.add(mas[i].pointHigh.x+1);
+        if(countRectangle != 0) {
+            Rectangle[] mas = new Rectangle[countRectangle];
+            for (int i = 0; i < countRectangle; i++) {
+                mas[i] = new Rectangle(in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt());
+            }
+            ArrayList<Integer> masX = new ArrayList<>();
+            ArrayList<Integer> masY = new ArrayList<>();
+            for (int i = 0; i < countRectangle; i++) {
+                masX.add(mas[i].pointDown.x);
+                masY.add(mas[i].pointDown.y);
+                masX.add(mas[i].pointHigh.x);
+                masY.add(mas[i].pointHigh.y);
+            }
+
+
+            // создания Set координат координат и их сортировка
+            createCoordinateCompression(masX);
+            createCoordinateCompression(masY);
+
+            ArrayList<Operation> masOper = new ArrayList<>();
+            // сжимаем коордианты прямоугольников и добовляем в массив операций
+            for (int i = 0; i < countRectangle; i++) {
+                mas[i].pointHigh = compressionPoint(masX, masY, mas[i].pointHigh);
+                mas[i].pointDown = compressionPoint(masX, masY, mas[i].pointDown);
+                masOper.add(new Operation(mas[i], 1));
+                masOper.add(new Operation(mas[i], -1));
+            }
+            BottleSort(masOper);
+            // сортируем массив операций
+            ArrayList<ArrayList<Operation>> masTr = new ArrayList<>();
+            for (int i = 0; i < masX.size(); i++) {
+                masTr.add(new ArrayList<Operation>());
+                for (int j = 0; j < masOper.size(); j++) {
+                    if (masOper.get(j).mod == 1) {
+                        if (masOper.get(j).rectangle.pointDown.x == i) {
+                            masTr.get(i).add(masOper.get(j));
+                        }
+                    } else {
+                        if (masOper.get(j).rectangle.pointHigh.x == i) {
+                            masTr.get(i).add(masOper.get(j));
+                        }
+                    }
+                }
+            }
+
+            int countNode = masOper.size() - 2;
+            Tree start = new Tree(0, countNode);
+            Tree[] masTree = new Tree[masTr.size()];
+            for (int i = 0; i < masTree.length; i++) {
+                if (i == 0) {
+                    masTree[i] = new Tree();
+                    masTree[i].copy(start);
+                    for (int j = 0; j < masTr.get(i).size(); j++) {
+                        masTree[i].modificate(masTr.get(i).get(j).mod, masTr.get(i).get(j).rectangle.pointDown.y, masTr.get(i).get(j).rectangle.pointHigh.y - 1);
+                    }
+
+
+                } else {
+                    masTree[i] = new Tree();
+                    masTree[i].copy(masTree[i - 1]);
+                    for (int j = 0; j < masTr.get(i).size(); j++) {
+                        masTree[i].modificate(masTr.get(i).get(j).mod, masTr.get(i).get(j).rectangle.pointDown.y, masTr.get(i).get(j).rectangle.pointHigh.y - 1);
+                    }
+
+                }
+            }
+            int countPoint = in.nextInt();
+            if (countPoint != 0 ){
+
+
+                for (int i = 0; i < countPoint; i++) {
+                    Point point = new Point(in.nextInt(), in.nextInt());
+                    point = compressionPoint(masX, masY, point);
+//            System.out.println("(Point"+point.x+" "+point.y + ")");
+                    int sum = 0;
+                    if (point != null) {
+//                System.out.println("Point"+point.x+" "+point.y);
+                        sum = masTree[point.x].sumMod(point.y,sum);
+                        System.out.print(sum+" ");
+                        sum = 0;
+                    } else {
+                        System.out.print(0+ " ");
+                    }
+                }
+            }
         }
 
 
-        // создания Set координат координат и их сортировка
-        createCoordinateCompression(masX);
-        createCoordinateCompression(masY);
-        System.out.println(masX);
-        System.out.println(masY);
-        for (int i = 0; i < countRectangle; i++) {
-            mas[i].pointHigh = compressionPoint(masX,masY,mas[i].pointHigh);
-            mas[i].pointDown = compressionPoint(masX,masY,mas[i].pointDown);
-        }
-        for (int i = 0; i < countRectangle; i++) {
-            if (mas[i].pointHigh != null & mas[i].pointDown != null){
-                System.out.println(mas[i].pointDown.x + " " + mas[i].pointDown.y + " " + mas[i].pointHigh.x + " " + mas[i].pointHigh.y);
-            }
-            else{
-                System.out.println("гыг");
-            }
-        }
-        ArrayList <Rectangle> operation = new ArrayList<>();
-        for (int i = 0; i < countRectangle; i++) {
-            operation.add(mas[i]);
-        }
 
-
-        int countPoint =in.nextInt();
-        for (int i = 0; i < countPoint; i++) {
-            Point point = new Point(in.nextInt(),in.nextInt());
-            point = compressionPoint(masX,masY,point);
-            if (point != null){
-                System.out.println(point.x+" "+point.y);
-            }
-            else{
-                System.out.println(point);
-            }
-        }
     }
-    public static class Tree{
+
+    public static class Tree {
         Tree left;
         Tree right;
         int sum;
-        public Tree(){
+        int lg;
+        int rg;
+
+        public Tree() {
             left = null;
             right = null;
             sum = 0;
         }
+
+        public Tree(int one) {
+            lg = one;
+            rg = one;
+            left = null;
+            right = null;
+            sum = 0;
+        }
+
+        public Tree(int start, int end) {
+            lg = start;
+            rg = end;
+            sum = 0;
+            if (start == end - 1) {
+                left = new Tree(start);
+                right = new Tree(end);
+            } else if (start == end) {
+                left = null;
+                right = null;
+            } else {
+                int newEnd = (start + end) / 2;
+                left = new Tree(start, newEnd);
+                right = new Tree(newEnd + 1, end);
+            }
+        }
+
+        public void copy(Tree tree) {
+            lg = tree.lg;
+            rg = tree.rg;
+            sum = tree.sum;
+            if (tree.left != null) {
+                left = new Tree();
+                left.copy(tree.left);
+            }
+            if (tree.right != null) {
+                right = new Tree();
+                right.copy(tree.right);
+            }
+        }
+
+
+        public void modificate(int mod, int l, int r) {
+            if (l <= lg & r  >= rg) {
+                this.sum += mod;
+            } else {
+                if (left != null) {
+                    left.modificate(mod, l, r);
+                }
+                if (right != null) {
+                    right.modificate(mod, l, r);
+                }
+            }
+        }
+
+        public int sumMod(int num, int mod) {
+
+            if (num == this.lg & num == this.rg) {
+//                mod += sum;
+                return mod+sum;
+            }
+            else if(this.left == null & this.right == null){
+                    return 0;
+                }
+            else if (this.left == null & this.right != null) {
+                return right.sumMod(num,mod+this.sum);}
+            else if (this.left != null & this.right == null) {
+                return left.sumMod(num,mod+this.sum);}
+            else {
+                int nsum = sum+mod;
+                int sum1 = left.sumMod(num, nsum);
+                int sum2 = right.sumMod(num,nsum);
+                return Math.max(sum1,sum2);
+            }
+        }
+        public void print(){
+            if(left == null & right == null){
+                System.out.println(lg+"mod"+sum);
+            }
+            else if(left != null & right == null){
+                System.out.println("("+lg +" "+ rg + ")" +"mod"+sum);
+                left.print();
+            }
+            else if(left == null){
+                System.out.println("("+lg +" "+ rg + ")" +"mod"+sum);
+                right.print();
+            }
+            else{
+                System.out.println("("+lg +" "+ rg + ")" +"mod"+sum);
+                left.print();
+                right.print();
+            }
+        }
     }
+    public static void BottleSort(ArrayList<Operation> masOper){
+        for (int i = 0; i < masOper.size(); i++) {
+            for (int j = i+1; j < masOper.size(); j++) {
+                if(masOper.get(i).mod == 1){
+                    if(masOper.get(j).mod == 1){
+                        if(masOper.get(j).rectangle.pointDown.x < masOper.get(i).rectangle.pointDown.x ){
+                            Collections.swap(masOper,i,j);
+                        }
+                    }
+                    else{
+                        if(masOper.get(j).rectangle.pointHigh.x < masOper.get(i).rectangle.pointDown.x ){
+                            Collections.swap(masOper,i,j);
+                        }
+                    }
+                }
+                else{
+                    if(masOper.get(j).mod == 1){
+                        if(masOper.get(j).rectangle.pointDown.x <= masOper.get(i).rectangle.pointHigh.x ){
+                            Collections.swap(masOper,i,j);
+                        }
+                    }
+                    else{
+                        if(masOper.get(j).rectangle.pointHigh.x < masOper.get(i).rectangle.pointHigh.x ){
+                            Collections.swap(masOper,i,j);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public static class Operation{
+        Rectangle rectangle;
+        int mod;
+        public Operation(Rectangle rectangle,int mod){
+            this.rectangle = rectangle;
+            this.mod = mod;
+        }
+    }
+
     public static Point compressionPoint(ArrayList<Integer> masX,ArrayList<Integer> masY,Point point){
         int nx = masX.indexOf(point.x);
         int ny = masY.indexOf(point.y);
